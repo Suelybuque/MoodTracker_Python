@@ -1,0 +1,9 @@
+pandas
+sqlalchemy
+reportlab
+matplotlib
+streamlit
+boto3 
+google-cloud-storage
+python-dateutil
+click
