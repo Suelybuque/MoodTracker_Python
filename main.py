@@ -1,6 +1,7 @@
 import click
 from pipeline.extract import collect_and_store, seed_demo_data
 from pipeline.db import MoodDB
+from pipeline.load import upload_to_s3, upload_to_gcs
 from pipeline.transform import Transformer
 from pipeline.report import ReportGenerator
 from datetime import date
@@ -33,6 +34,8 @@ def report():
     trend= t.rolling_trend(7)
     rg= ReportGenerator(output_path=f"reports/weekly_{summary.get('end_date')}.pdf")
     out= rg.create_weekly_report(summary, trend)
+   # upload_to_s3(out, "my-mood-bucket")
+    #upload_to_gcs(out, "my-mood-bucket-gcs")
     print('Report ready:', out)
 
 if __name__== '__main__':
