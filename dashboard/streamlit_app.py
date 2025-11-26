@@ -102,7 +102,7 @@ else:
     if not trend.empty:
         fig = px.line(
             trend,
-            x="date",
+            x="time",
             y=["mood", "energy", "stress"],
              color='variable',
             hover_data={'day': trend['day']},
