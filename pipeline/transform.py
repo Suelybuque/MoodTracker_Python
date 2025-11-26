@@ -79,7 +79,7 @@ class Transformer:
         tmp = self.df.set_index(pd.to_datetime(self.df['date']))
         tmp_rolled = tmp[['mood', 'energy', 'stress']].rolling(f"{window_days}D").mean()
         tmp_rolled = tmp_rolled.dropna().reset_index()
-        tmp_rolled['date'] = tmp_rolled['date'].dt.date
+        tmp_rolled['date'] = pd.to_datetime(tmp_rolled['date'])
 
         return tmp_rolled[['date', 'mood', 'energy', 'stress']]
 

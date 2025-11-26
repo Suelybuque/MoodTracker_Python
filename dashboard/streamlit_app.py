@@ -96,27 +96,28 @@ else:
     # --- Rolling Trend Chart ---
     st.subheader("📈 Rolling Trend (7-day)")
     trend = t.rolling_trend(7)
-    trend['time'] = trend['date'].dt.strftime('%H:%M')   # hora:minuto
-    trend['day'] = trend['date'].dt.strftime('%d-%m-%Y') # dia-mês-ano
+    
 
     if not trend.empty:
+        trend['date'] = pd.to_datetime(trend['date'])  
+        trend['time'] = trend['date'].dt.strftime('%H:%M')   
+        trend['day'] = trend['date'].dt.strftime('%d-%m-%Y')  
         fig = px.line(
             trend,
             x="time",
             y=["mood", "energy", "stress"],
-             color='variable',
-            hover_data={'day': trend['day']},
+            hover_data={'day': True},
             markers=True,
             labels={"value": "Score", "date": "Date"},
             title="Mood, Energy, Stress Over Time"
         )
 
         fig.update_traces(line=dict(width=4))
-        fig.update_xaxes(
+        """   fig.update_xaxes(
             tickformat="%H:%M<br>%d/%m/%Y",
             tickangle=0
         )
-
+        """
         st.plotly_chart(fig, use_container_width=True)
 
     st.markdown("---")
