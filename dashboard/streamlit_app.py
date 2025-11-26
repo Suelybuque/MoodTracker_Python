@@ -96,12 +96,16 @@ else:
     # --- Rolling Trend Chart ---
     st.subheader("📈 Rolling Trend (7-day)")
     trend = t.rolling_trend(7)
+    trend['time'] = trend['date'].dt.strftime('%H:%M')   # hora:minuto
+    trend['day'] = trend['date'].dt.strftime('%d-%m-%Y') # dia-mês-ano
 
     if not trend.empty:
         fig = px.line(
             trend,
             x="date",
             y=["mood", "energy", "stress"],
+             color='variable',
+            hover_data={'day': trend['day']},
             markers=True,
             labels={"value": "Score", "date": "Date"},
             title="Mood, Energy, Stress Over Time"
