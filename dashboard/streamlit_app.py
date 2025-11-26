@@ -27,9 +27,10 @@ db = MoodDB()
 records = db.fetch_all()
 df = pd.DataFrame(records) if records else pd.DataFrame()
 
+
 # Timestamps 
 if not df.empty and "date" in df.columns:
-    df["date"] = pd.to_datetime(df["date"], errors="coerce")
+  df['date'] = pd.to_datetime(df['date'])
 
 t = Transformer.from_records(records) if records else None
 

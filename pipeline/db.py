@@ -1,6 +1,7 @@
 from sqlalchemy import create_engine, Column, Integer, String, Date, Text, MetaData, Table
 from sqlalchemy.orm import sessionmaker
-from datetime import date
+from sqlalchemy import DateTime
+from datetime import datetime
 import os
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -24,7 +25,7 @@ class MoodDB:
         self.table = Table(
             'mood', self.metadata,
             Column('id', Integer, primary_key = True, autoincrement = True),
-            Column('date', Date, nullable = False),
+            Column('date', DateTime, nullable=False),
             Column('mood', Integer, nullable = False),
             Column('energy', Integer, nullable = False),
             Column('stress', Integer, nullable = False),
@@ -33,7 +34,7 @@ class MoodDB:
         self.metadata.create_all(self.engine)
         self.Session = sessionmaker (bind = self.engine)
 
-    def insert(self, date_value: date, mood: int, energy: int, stress: int, notes: str = ""):
+    def insert(self, date_value: datetime, mood: int, energy: int, stress: int, notes: str = ""):
         with self.engine.begin() as conn :
             conn.execute(self.table.insert().values(
                 date= date_value,
