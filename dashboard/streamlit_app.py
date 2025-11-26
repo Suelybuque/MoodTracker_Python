@@ -97,6 +97,7 @@ else:
 
         fig.update_traces(line=dict(width=4))
         fig.update_xaxes(tickformat="%Y-%m-%d %H:%M")
+        fig.update_xaxes(tickangle=45)
         st.plotly_chart(fig, use_container_width=True)
 
     st.markdown("---")
