@@ -113,11 +113,6 @@ else:
         )
 
         fig.update_traces(line=dict(width=4))
-        """   fig.update_xaxes(
-            tickformat="%H:%M<br>%d/%m/%Y",
-            tickangle=0
-        )
-        """
         st.plotly_chart(fig, use_container_width=True)
 
     st.markdown("---")
