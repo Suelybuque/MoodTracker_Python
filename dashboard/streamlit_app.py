@@ -1,17 +1,21 @@
 import os
 import sys
-from datetime import date
+from datetime import date, datetime
 import streamlit as st
 import pandas as pd
 import plotly.express as px
 
+# ---------------------
+# Path setup
+# ---------------------
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(PROJECT_ROOT)
+
 from pipeline.db import MoodDB
 from pipeline.transform import Transformer
 
 # ---------------------
-# Setup
+# Streamlit Setup
 # ---------------------
 st.set_page_config(
     page_title="Mood & Energy Dashboard",
@@ -21,15 +25,19 @@ st.set_page_config(
 
 db = MoodDB()
 records = db.fetch_all()
-t = Transformer.from_records(records) if records else None
 df = pd.DataFrame(records) if records else pd.DataFrame()
 
+# Timestamps 
+if not df.empty and "date" in df.columns:
+    df["date"] = pd.to_datetime(df["date"], errors="coerce")
+
+t = Transformer.from_records(records) if records else None
+
 # ---------------------
-# Sidebar Form
+# Sidebar - Add Entry
 # ---------------------
 st.sidebar.header("Add a new entry")
 
-# Initialize session state defaults
 for key, default in [("mood", 3), ("energy", 3), ("stress", 3), ("notes", "")]:
     if key not in st.session_state:
         st.session_state[key] = default
@@ -37,24 +45,26 @@ for key, default in [("mood", 3), ("energy", 3), ("stress", 3), ("notes", "")]:
 
 def submit_entry():
     db.insert(
-        date.today(),
+        datetime.now(),
         st.session_state.mood,
         st.session_state.energy,
         st.session_state.stress,
         st.session_state.notes
     )
+
     st.success("Entry saved!")
 
-    # Reset form
+    # Reset fields
     st.session_state.mood = 3
     st.session_state.energy = 3
     st.session_state.stress = 3
     st.session_state.notes = ""
 
-    # Refresh dataframe
+    # Reload data
     global df, t
     records = db.fetch_all()
     df = pd.DataFrame(records)
+    df["date"] = pd.to_datetime(df["date"], errors="coerce")
     t = Transformer.from_records(records)
 
 
@@ -71,9 +81,9 @@ with st.sidebar.form("mood_form"):
 st.title("🌈 Mood & Energy Dashboard")
 
 if df.empty:
-    st.info('No data yet. Use the sidebar to add your first entry!')
+    st.info("No data yet. Use the sidebar to add your first entry!")
 else:
-    # Weekly Summary Cards
+    # --- Weekly Summary ---
     summary = t.weekly_summary()
     col1, col2, col3, col4 = st.columns(4)
     col1.metric("Avg Mood", summary.get("avg_mood", "-"))
@@ -82,27 +92,30 @@ else:
 
     st.markdown("---")
 
-    # Rolling Trend Chart
+    # --- Rolling Trend Chart ---
     st.subheader("📈 Rolling Trend (7-day)")
     trend = t.rolling_trend(7)
+
     if not trend.empty:
-        fig= px.line(
+        fig = px.line(
             trend,
             x="date",
             y=["mood", "energy", "stress"],
-            markers= True,
-            labels= {"value": "Score", "date":"Date"},
+            markers=True,
+            labels={"value": "Score", "date": "Date"},
             title="Mood, Energy, Stress Over Time"
         )
 
         fig.update_traces(line=dict(width=4))
-        fig.update_xaxes(tickformat="%Y-%m-%d %H:%M")
-        fig.update_xaxes(tickangle=45)
+        fig.update_xaxes(
+            tickformat="%H:%M<br>%d/%m/%Y",
+            tickangle=0
+        )
+
         st.plotly_chart(fig, use_container_width=True)
 
     st.markdown("---")
 
-
-    # Raw Entries Table
+    # --- Raw Table ---
     st.subheader("📊 Raw Entries")
     st.dataframe(df.sort_values("date", ascending=False).reset_index(drop=True))
