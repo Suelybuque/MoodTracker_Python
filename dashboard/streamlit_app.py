@@ -98,23 +98,28 @@ else:
     trend = t.rolling_trend(7)
     
 
-    if not trend.empty:
-        trend['date'] = pd.to_datetime(trend['date'])  
-        trend['time'] = trend['date'].dt.strftime('%H:%M')   
-        trend['day'] = trend['date'].dt.strftime('%d-%m-%Y')  
-        fig = px.line(
-            trend,
-            x="time",
-            y=["mood", "energy", "stress"],
-            hover_data={'day': True},
-            markers=True,
-            labels={"value": "Score", "date": "Date"},
-            title="Mood, Energy, Stress Over Time"
-        )
+if not trend.empty:
+    trend['date'] = pd.to_datetime(trend['date'])
 
-        fig.update_traces(line=dict(width=4))
-        st.plotly_chart(fig, use_container_width=True)
+    fig = px.line(
+        trend,
+        x='date',  # keep datetime
+        y=['mood', 'energy', 'stress'],
+        markers=True,
+        labels={'value': 'Score', 'date': 'Date'},
+        title='Mood, Energy, Stress Over Time',
+        hover_data={'mood': True, 'energy': True, 'stress': True}
+    )
 
+    fig.update_traces(line=dict(width=4))
+    
+    # Format X-axis: time on top, day below
+    fig.update_xaxes(
+        tickformat="%H:%M\n%d-%m-%Y",  # hour:minute on first line, day-month-year on second
+        tickangle=0
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
     st.markdown("---")
 
     # --- Raw Table ---
